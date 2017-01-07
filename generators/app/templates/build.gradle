@@ -1,0 +1,98 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+        maven() { url 'https://plugins.gradle.org/m2/' }<%
+        var repos = s.build.dependencyManager.repositories;
+        for (var repoName in repos) {
+            var repo = repos[repoName];
+            var hasCredentials = repo.login != null && repo.password != null;
+        %>
+        maven() { url '<%= repo.url %>';<% if (hasCredentials) { %> credentials { username = '<%= repo.login %>'; password = '<%= repo.password %>'; } <% } %> }<% } %>
+    }
+
+    dependencies {
+        classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:3.0.1'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.4.2.RELEASE'
+        classpath 'io.spring.gradle:dependency-management-plugin:0.6.0.RELEASE'<%
+        var plugins = s.build.plugins;
+        for (var pluginName in plugins) {
+            var plugin = plugins[pluginName];
+        %>
+        classpath '<%= plugin.group %>:<%= plugin.name %>:<%= plugin.name %>'<% } %>
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'application'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: "io.spring.dependency-management"
+apply plugin: "io.advantageous.docker-test"
+
+repositories {
+    mavenLocal()
+    jcenter()
+    mavenCentral()<%
+    var repos = s.build.dependencyManager.repositories;
+    for (var repoName in repos) {
+        var repo = repos[repoName];
+        var hasCredentials = repo.login != null && repo.password != null;
+    %>
+    maven() { url '<%= repo.url %>';<% if (hasCredentials) { %> credentials { username = '<%= repo.login %>'; password = '<%= repo.password %>'; } <% } %> }<% } %>
+}
+
+compileJava {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+    mainClassName       = 'boxfish.workers.youtube.AppEntry'
+}
+
+jar {
+    baseName = '<%= s.metadata.jar_name %>'
+    group    = '<%= s.metadata.jar_group %>'
+    version  = '1.0.0'
+    manifest { attributes 'Main-Class': '<%= s.metadata.base_package %>.AppEntry' }
+}
+
+dependencies {
+    compile 'org.springframework.cloud:spring-cloud-starter-eureka:1.2.0.RELEASE'
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'org.springframework.boot:spring-boot-starter-actuator'
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+    compile 'mysql:mysql-connector-java:6.0.4'
+    compile 'com.amazonaws:aws-java-sdk-s3:1.10.54';
+    compile 'commons-io:commons-io:2.5'
+    compile 'org.apache.commons:commons-lang3:3.5'
+    compile 'org.json:json'
+
+    compile 'com.boxfish:boxfish-commons-web-validation:1.0.0'
+    compile 'com.boxfish:boxfish-commons-web-identity-tomcat:1.0.0'
+    compile 'com.boxfish:boxfish-commons-web-format-json:1.0.0'
+
+    runtime 'org.flywaydb:flyway-core'
+
+    testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'com.boxfish:boxfish-commons-web-testing:1.0+'
+    testCompile 'com.boxfish:boxfish-commons-web-mocking:1.0+'
+    testCompile 'com.boxfish:boxfish-commons-test-web:1.0+'
+    testCompile 'com.boxfish:boxfish-commons-test-data-seed:1.0+'
+    testCompile 'com.boxfish:boxfish-commons-test-data-jpa:1.0+'
+    testCompile 'io.advantageous.gradle:docker-test-plugin:0.1+'
+}
+
+testDockerContainers {
+    mysql {
+        publishAll true
+        containerName "mysql"
+        env ("MYSQL_ROOT_PASSWORD":"root")
+        portMapping(container: 3306, host: 3306)
+        image "mysql"
+        waitAfterRun 10
+    }
+}
+
+test.dependsOn startTestDocker
+test.finalizedBy stopTestDocker
