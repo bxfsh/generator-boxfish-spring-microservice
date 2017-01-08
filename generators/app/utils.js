@@ -83,6 +83,14 @@ module.exports = class Utils {
         return changeCase.camel(attribute.id);
     }
 
+    entityGetterNameOf(attribute) {
+        return "get" + changeCase.pascal(attribute.id);
+    }
+
+    entitySetterNameOf(attribute) {
+        return "set" + changeCase.pascal(attribute.id);
+    }
+
     javaTypeOfId(entity) {
         if (entity.properties != null && entity.properties.id_type != null)
             return this.javaTypeOf(entity.properties.id_type);

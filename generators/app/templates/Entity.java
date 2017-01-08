@@ -43,5 +43,20 @@ public class <%= entityName %> {
         this.id = id;
         return this;
     }
+    <% for (var attributeName in e.attributes) {
+        var attribute = e.attributes[attributeName];
+    %>
+    public <%= utils.javaTypeOf(attribute.rawType) %> <%= utils.entityGetterNameOf(attribute) %>() {
+        <% if (utils.javaTypeOf(attribute.rawType) == "Instant") {
+        %>return <%= utils.entityAttributeNameOf(attribute) %>.toInstant();<% } else {
+        %>return <%= utils.entityAttributeNameOf(attribute) %>;<% } %>
+    }
 
+    public <%= entityName %> <%= utils.entitySetterNameOf(attribute) %>(final <%= utils.javaTypeOf(attribute.rawType) %> <%= utils.entityAttributeNameOf(attribute) %>) {
+        <% if (utils.javaTypeOf(attribute.rawType) == "Instant") {
+        %>this.<%= utils.entityAttributeNameOf(attribute) %> = Timestamp.from(<%= utils.entityAttributeNameOf(attribute) %>);<% } else {
+        %>this.<%= utils.entityAttributeNameOf(attribute) %> = <%= utils.entityAttributeNameOf(attribute) %>;<% } %>
+        return this;
+    }
+    <% } %>
 }
