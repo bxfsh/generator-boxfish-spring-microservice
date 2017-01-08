@@ -24,7 +24,8 @@ module.exports = class Utils {
     }
 
     tableNameOf(entity) {
-        return changeCase.snake(entity.id);
+        var plural = pluralize.plural(entity.id);
+        return changeCase.snake(plural);
     }
 
     entityNameOf(entity) {
