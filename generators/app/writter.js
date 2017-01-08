@@ -41,7 +41,9 @@ module.exports = class Writter {
                 var source      = template.source;
                 var destination = template.destination
                     .replace('{entityPackage}', utils.packageToFolder(utils.domainPackageOf(entity)))
-                    .replace('{entityName}', utils.packageToFolder(utils.entityNameOf(entity)));
+                    .replace('{entityName}', utils.packageToFolder(utils.entityNameOf(entity)))
+                    .replace('{repositoryName}', utils.packageToFolder(utils.repositoryNameOf(entity)))
+                    .replace('{serviceName}', utils.packageToFolder(utils.serviceNameOf(entity)));
 
                 this.generator.fs.copyTpl(
                   this.generator.templatePath(source),
@@ -66,8 +68,13 @@ module.exports = class Writter {
 
     templateForDomainFiles() {
         return [
-            { "source": "Entity.java"    , "destination": this.mainPackageFolder + "/{entityPackage}/{entityName}.java" }/*,
-            { "source": "EntityTest.java", "destination": this.testPackageFolder + "/domain.{entityPackage}/{entityName}Test.java" }*/
+            { "source": "Entity.java"          , "destination": this.mainPackageFolder + "/{entityPackage}/{entityName}.java" },
+            { "source": "EntityTest.java"      , "destination": this.testPackageFolder + "/{entityPackage}/{entityName}Test.java" },
+            { "source": "Repository.java"      , "destination": this.mainPackageFolder + "/{entityPackage}/{repositoryName}.java" },
+            { "source": "RepositoryCustom.java", "destination": this.mainPackageFolder + "/{entityPackage}/{repositoryName}Custom.java" },
+            { "source": "RepositoryTest.java"  , "destination": this.testPackageFolder + "/{entityPackage}/{repositoryName}Test.java" },
+            { "source": "Service.java"         , "destination": this.mainPackageFolder + "/{entityPackage}/{serviceName}.java" },
+            { "source": "ServiceTest.java"     , "destination": this.testPackageFolder + "/{entityPackage}/{serviceName}Test.java" }
         ]
     }
 }
