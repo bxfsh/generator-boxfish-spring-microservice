@@ -30,7 +30,7 @@ module.exports = class Prompt {
                         fs.readdir(response.specsFolder, (err, files) => {
                             files.forEach(file => {
                                 if (!file.startsWith('.'))
-                                filesInSpecsFolder.push(response.specsFolder + '/' + file);
+                                    filesInSpecsFolder.push(response.specsFolder + '/' + file);
                             });
                         });
 
