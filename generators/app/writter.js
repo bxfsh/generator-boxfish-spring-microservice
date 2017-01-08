@@ -3,8 +3,7 @@ var YAML = require('yamljs');
 module.exports = class Writter {
     constructor(generator) {
         this.generator         = generator;
-        this.props             = generator.props;
-        this.specification     = YAML.load(this.props.filePath);
+        this.specification     = YAML.load(generator.props.specFile);
         this.baseFolder        = this.specification.metadata.jar_name;
         this.mainFolder        = this.baseFolder + "/src/main/java"
         this.mainPackageFolder = this.mainFolder + "/" + (this.specification.metadata.base_package.replace(/\./gi, "/"))
