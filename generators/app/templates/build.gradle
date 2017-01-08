@@ -20,7 +20,7 @@ buildscript {
         for (var pluginName in plugins) {
             var plugin = plugins[pluginName];
         %>
-        classpath '<%= plugin.group %>:<%= plugin.name %>:<%= plugin.name %>'<% } %>
+        classpath '<%= plugin.group %>:<%= plugin.name %>:<%= plugin.version %>'<% } %>
     }
 }
 

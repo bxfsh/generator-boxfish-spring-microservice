@@ -23,17 +23,30 @@ module.exports = Generator.extend({
     },
 
     writing: function () {
-        var specification = YAML.load(this.props.filePath);
-        var baseFolder = specification.metadata.jar_name;
+        var specification     = YAML.load(this.props.filePath);
+        var baseFolder        = specification.metadata.jar_name;
+        var mainFolder        = baseFolder + "/src/main/java"
+        var mainPackageFolder = mainFolder + "/" + (specification.metadata.base_package.replace(/\./gi, "/"))
+        var testFolder        = baseFolder + "/src/test/java"
+        var testPackageFolder = testFolder + "/" + (specification.metadata.base_package.replace(/\./gi, "/"))
 
-        this.fs.copyTpl(
-          this.templatePath('build.gradle'),
-          this.destinationPath(baseFolder + '/build.gradle'),
-          { s: specification }
-        );
+        var templatesForRoot = [
+            { "source": "build.gradle"     , "destination": baseFolder + "/build.gradle" },
+            { "source": "AppEntry.java"    , "destination": mainPackageFolder + "/AppEntry.java" },
+            { "source": "AppEntryTest.java", "destination": testPackageFolder + "/AppEntryTest.java" }
+        ]
+
+        for (var i = 0; i < templatesForRoot.length; i++) {
+            var template = templatesForRoot[i];
+            this.fs.copyTpl(
+              this.templatePath(template.source),
+              this.destinationPath(template.destination),
+              { s: specification }
+            );
+        }
     },
 
     install: function () {
-        this.installDependencies();
+        //this.installDependencies();
     }
 });

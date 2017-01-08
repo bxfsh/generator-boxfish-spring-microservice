@@ -53,5 +53,5 @@
     "prepublish": "gulp prepublish",
     "test": "gulp"
   },
-  "license": "MIT"
+  "license": "GPL-3.0"
 }
