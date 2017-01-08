@@ -3,17 +3,18 @@ var entityIdGenerator = utils.entityIdGeneratorOf(e);
 var entityIdType = utils.javaTypeOfId(e);
 var entityName = utils.entityNameOf(e);
 %>package <%= utils.fullDomainPackageOf(e) %>;
-
+<% if (utils.hasEntityAnyAttributeOfType(e, "BigDecimal")) {%>
+import java.math.BigDecimal;<% } %><% if (utils.hasEntityAnyAttributeOfType(e, "Timestamp")) {%>
 import java.sql.Timestamp;
 import java.time.Instant;
-
+<% } %>
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;<% if (entityIdGenerator == null) { %>
 import javax.persistence.GenerationType;<% } %>
 import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+import javax.persistence.Table;<% if (utils.hasEntityAnyNotNull(e)) { %>
+import javax.validation.constraints.NotNull;<% } %>
 <% if (entityIdGenerator != null) { %>
 import org.hibernate.annotations.GenericGenerator;
 <% } %>
@@ -27,11 +28,13 @@ public class <%= entityName %> {
     @GeneratedValue(strategy = GenerationType.IDENTITY)<% } %>
     @Column(name = "id")
     private <%= entityIdType %> id;
-
-    @NotNull
-    @Column(name = "createdAt")
-    private Timestamp createdAt;
-
+    <% for (var attributeName in e.attributes) {
+        var attribute = e.attributes[attributeName];
+    %>
+    @Column(name = "<%= utils.entityAttributeColumnOf(attribute) %>")<% if (utils.isEntityAttributeRequired(attribute)) { %>
+    @NotNull<% } %>
+    private <%= utils.entityAttributeTypeOf(attribute) %> <%= utils.entityAttributeNameOf(attribute) %>;
+    <% } %>
     public <%= entityIdType %> getId() {
         return id;
     }
@@ -41,13 +44,4 @@ public class <%= entityName %> {
         return this;
     }
 
-    public Instant getCreatedAt() {
-        return createdAt.toInstant();
-    }
-
-    public <%= entityName %> setId(final Instant createdAt) {
-        this.createdAt = Timestamp.from(createdAt);
-        return this;
-    }
-    
 }

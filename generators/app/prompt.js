@@ -27,12 +27,13 @@ module.exports = class Prompt {
                 {
                     when: function(response) {
                         if (!fs.existsSync(response.specsFolder)) fs.mkdirSync(response.specsFolder);
-                        fs.readdir(response.specsFolder, (err, files) => {
-                            files.forEach(file => {
-                                if (!file.startsWith('.'))
-                                    filesInSpecsFolder.push(response.specsFolder + '/' + file);
-                            });
-                        });
+
+                        var files = fs.readdirSync(response.specsFolder);
+                        for (var i = 0; i < files.length; i++) {
+                            var file = files[i];
+                            if (!file.startsWith('.'))
+                                filesInSpecsFolder.push(response.specsFolder + '/' + file);
+                        }
 
                         return true;
                     },

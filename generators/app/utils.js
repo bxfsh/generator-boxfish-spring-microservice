@@ -1,4 +1,5 @@
-var changeCase = require('change-case')
+var changeCase = require('change-case');
+var pluralize = require('pluralize');
 
 module.exports = class Utils {
     constructor(specification) {
@@ -45,6 +46,43 @@ module.exports = class Utils {
             return null;
     }
 
+    isEntityAttributeRequired(attribute) {
+        return attribute.isInsertableRequired && attribute.isUpdatableRequired;
+    }
+
+    hasEntityAnyAttributeOfType(entity, type) {
+        for (var attributeName in entity.attributes) {
+            var attribute = entity.attributes[attributeName];
+            if (this.entityAttributeTypeOf(attribute) == type)
+                return true;
+        }
+        return false;
+    }
+
+    hasEntityAnyNotNull(entity) {
+        for (var attributeName in entity.attributes) {
+            var attribute = entity.attributes[attributeName];
+            if (this.isEntityAttributeRequired(attribute))
+                return true;
+        }
+        return false;
+    }
+
+    entityAttributeTypeOf(attribute) {
+        var javaType = this.javaTypeOf(attribute.rawType);
+        if (javaType == "Instant")
+            return "Timestamp";
+        return javaType;
+    }
+
+    entityAttributeColumnOf(attribute) {
+        return changeCase.snake(attribute.id);
+    }
+
+    entityAttributeNameOf(attribute) {
+        return changeCase.camel(attribute.id);
+    }
+
     javaTypeOfId(entity) {
         if (entity.properties != null && entity.properties.id_type != null)
             return this.javaTypeOf(entity.properties.id_type);
@@ -53,18 +91,23 @@ module.exports = class Utils {
     }
 
     javaTypeOf(type) {
-        var pascalType = changeCase.pascal(type);
-        switch (pascalType) {
-            case "ExternalKey":
-            case "Text":
-            case "LongText":
+        var snaked = changeCase.snake(type);
+        switch (snaked) {
+            case "external_key":
+            case "text":
+            case "long_text":
                 return "String";
-            case "Number":
+            case "number":
                 return "Integer";
-            case "Decimal":
+            case "decimal":
+            case "big_decimal":
                 return "BigDecimal";
+            case "datetime":
+            case "date":
+            case "timestamp":
+                return "Instant";
             default:
-                return pascalType;
+                return changeCase.pascal(snaked);
         }
     }
 

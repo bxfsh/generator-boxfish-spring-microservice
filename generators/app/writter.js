@@ -1,10 +1,12 @@
-var YAML = require('yamljs');
 var Utils = require('./utils');
 
 module.exports = class Writter {
     constructor(generator) {
         this.generator         = generator;
-        this.specification     = YAML.load(generator.props.specFile);
+    }
+
+    using(specification) {
+        this.specification     = specification;
         this.utils             = new Utils(this.specification);
 
         this.baseFolder        = this.specification.metadata.jar_name;
@@ -12,9 +14,10 @@ module.exports = class Writter {
         this.mainPackageFolder = this.mainFolder + "/" + this.utils.packageToFolder(this.specification.metadata.base_package)
         this.testFolder        = this.baseFolder + "/src/test/java"
         this.testPackageFolder = this.testFolder + "/" + this.utils.packageToFolder(this.specification.metadata.base_package)
+        return this;
     }
 
-    launch() {
+    write() {
         var utils = this.utils;
 
         var templateForRootFiles = this.templateForRootFiles();
@@ -36,8 +39,6 @@ module.exports = class Writter {
             var entities = this.specification.entities;
             for (var entityName in entities) {
                 var entity    = entities[entityName];
-                entity.id     = entityName;
-
                 var source      = template.source;
                 var destination = template.destination
                     .replace('{entityPackage}', utils.packageToFolder(utils.domainPackageOf(entity)))
