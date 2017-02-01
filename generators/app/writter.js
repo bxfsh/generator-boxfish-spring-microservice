@@ -1,4 +1,5 @@
 var Utils = require('./utils');
+var Mocks = require('./mocks');
 
 module.exports = class Writter {
     constructor(generator) {
@@ -8,6 +9,7 @@ module.exports = class Writter {
     using(specification) {
         this.specification     = specification;
         this.utils             = new Utils(this.specification);
+        this.mocks             = new Mocks();
 
         this.baseFolder        = this.specification.metadata.jar_name;
         this.mainFolder        = this.baseFolder + "/src/main/java"
@@ -19,6 +21,7 @@ module.exports = class Writter {
 
     write() {
         var utils = this.utils;
+        var mocks = this.mocks;
 
         var templateForRootFiles = this.templateForRootFiles();
         for (var i = 0; i < templateForRootFiles.length; i++) {
@@ -52,7 +55,8 @@ module.exports = class Writter {
                   {
                       e: entity,
                       entity: entity,
-                      utils: utils
+                      utils: utils,
+                      mocks: mocks
                   }
                 );
             }

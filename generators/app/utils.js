@@ -92,11 +92,15 @@ module.exports = class Utils {
         return "set" + changeCase.pascal(attribute.id);
     }
 
-    javaTypeOfId(entity) {
+    rawTypeOfId(entity) {
         if (entity.properties != null && entity.properties.id_type != null)
-            return this.javaTypeOf(entity.properties.id_type);
+            return entity.properties.id_type;
         else
-            return "Integer";
+            return "number";
+    }
+
+    javaTypeOfId(entity) {
+        return this.javaTypeOf(this.rawTypeOfId(entity));
     }
 
     javaTypeOf(type) {
@@ -106,6 +110,9 @@ module.exports = class Utils {
             case "text":
             case "long_text":
                 return "String";
+            case "long":
+            case "big_number":
+                return "Long";
             case "number":
                 return "Integer";
             case "decimal":

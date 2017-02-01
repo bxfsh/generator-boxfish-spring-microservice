@@ -1,18 +1,23 @@
 <%
 var entityIdGenerator = utils.entityIdGeneratorOf(e);
 var entityIdType = utils.javaTypeOfId(e);
+var entityIdRawType = utils.rawTypeOfId(e);
 var entityName = utils.entityNameOf(e);
 %>package <%= utils.fullDomainPackageOf(e) %>;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
+<% if (utils.hasEntityAnyAttributeOfType(e, "BigDecimal")) {%>
+import java.math.BigDecimal;<% } %><% if (utils.hasEntityAnyAttributeOfType(e, "Timestamp")) {%>
+import java.time.Instant;
+<% } %>
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
 <% if (entityIdGenerator != null) { %>
 import org.hibernate.annotations.GenericGenerator;<% } %>
 import org.junit.Before;
@@ -43,8 +48,19 @@ public class <%= entityName %>Test {
         assertTrue(entityClass.getField("id").isAnnotationPresent(Column.class));
 
         assertNull(entity.getId());
-        final <%= entityIdType %> expected = "any-data";
+        final <%= entityIdType %> expected = <%- mocks.wrappedFor(entityIdRawType) %>;
         entity.setId(expected);
         assertEquals(expected, entity.getId());
     }
+
+    <% for (var attributeName in e.attributes) {
+        var attribute = e.attributes[attributeName];
+    %>
+    public void <%= utils.entityAttributeNameOf(attribute) %>() {
+        assertNull(entity.<%= utils.entityGetterNameOf(attribute) %>());
+        final <%= utils.javaTypeOf(attribute.rawType) %> expected = <%- mocks.wrappedFor(attribute.rawType) %>;
+        entity.<%= utils.entitySetterNameOf(attribute) %>(expected);
+        assertEquals(expected, entity.<%= utils.entityGetterNameOf(attribute) %>());
+    }
+    <% } %>
 }
